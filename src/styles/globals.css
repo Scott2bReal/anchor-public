@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-neutral-900 text-neutral-100
+}
+
+.rw {
+  @apply bg-emerald-800
+}
+
+.rw-text {
+  @apply text-emerald-800
+}
+
+.rh {
+  @apply bg-violet-600
+}
+
+.rh-text {
+  @apply text-violet-600
+}
+
+.sm {
+  @apply bg-sky-700
+}
+
+.sm-text {
+  @apply text-sky-700
+}
+
+.tc {
+  @apply bg-yellow-600
+}
+
+.tc-text {
+  @apply text-yellow-600
+}
+
+.sc {
+  @apply bg-rose-800
+}
+
+.sc-text {
+  @apply text-rose-800
+}
+
+.spm {
+  @apply bg-orange-900
+}
+
+.spm-text {
+  @apply text-amber-900
+}
+
+.expired {
+  @apply bg-red-700
+}
+
+.expired-text {
+  @apply text-red-700
+}
+
+.avo {
+  @apply bg-amber-700
+}
+
+.avo-text {
+  @apply text-amber-700
+}
+
+.ah {
+  @apply bg-teal-700
+}
+
+.ah-text {
+  @apply text-teal-700
+}
+
+.up {
+  @apply bg-green-700
+}
+
+.up-text {
+  @apply text-green-700
+}
+
+.ss {
+  @apply bg-red-700
+}
+
+.ss-text {
+  @apply text-red-700
+}
+
+.hp {
+  @apply bg-fuchsia-700
+}
+
+.hp-text {
+  @apply text-fuchsia-700
+}
+
+.block37 {
+  @apply bg-sky-700
+}
+
+.block37-text {
+  @apply text-sky-700
+}
+
+.peoria {
+  @apply bg-blue-700
+}
+
+.peoria-text {
+  @apply text-blue-700
+}
