@@ -28,11 +28,6 @@ export default defineNextConfig({
         destination: '/schedule',
         permanent: false,
       },
-      {
-        source: '/en/schedule',
-        destination: '/schedule',
-        permanent: false,
-      }
     ]
   }
 });

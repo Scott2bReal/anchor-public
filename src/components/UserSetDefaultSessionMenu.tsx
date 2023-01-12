@@ -18,6 +18,8 @@ export const UserSetDefaultSessionMenu = ({ initialDefault, user }: Props) => {
   const { data: sessions, isLoading: sessionsLoading } = trpc.climbingSession.getAll.useQuery()
   const showConfirmButton = selectedSession.id !== currentDefault.id
 
+  const currentSessionId = sessions?.find(session => session.current)?.id
+
   const setUserDefault = trpc.user.setDefaultSession.useMutation({
     onMutate: async () => {
       toast.loading(`Setting your default session...`)
@@ -37,7 +39,7 @@ export const UserSetDefaultSessionMenu = ({ initialDefault, user }: Props) => {
   })
 
   if (sessionsLoading) return <LoadingSpinner />
-  if (!sessions) return <div>Couldn&apos;t find any sessions!</div>
+  if (!sessions || !currentSessionId) return <div>Couldn&apos;t find any sessions!</div>
 
   console.log(`Show Confirm Button: `, showConfirmButton)
 

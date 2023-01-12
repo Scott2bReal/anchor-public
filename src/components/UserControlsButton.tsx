@@ -2,6 +2,7 @@ import { Dialog } from "@headlessui/react"
 import { WrenchScrewdriverIcon } from "@heroicons/react/24/outline"
 import { User } from "@prisma/client"
 import { useState } from "react"
+import { useSetUserDefaultSession } from "../hooks/useSetUserDefaultSession"
 import { trpc } from "../utils/trpc"
 import LoadingSpinner from "./LoadingSpinner"
 import { UserControls } from "./UserControls"
@@ -13,11 +14,15 @@ interface Props {
 export const UserControlsButton = ({user}: Props) => {
   const [isOpen, setIsOpen] = useState(false)
   const toggleIsOpen = () => setIsOpen(!isOpen)
-  const {data: userDefaultSession, isLoading: defaultLoading} = trpc.climbingSession.getById.useQuery({id: user?.defaultSessionId ?? ''})
+  const {data: currentSessionId, isLoading: currentLoading} = trpc.climbingSession.getCurrentId.useQuery()
+  const setDefault = useSetUserDefaultSession()
 
+  if (currentLoading) return <LoadingSpinner />
+  if (!user) return <div>You must be logged in</div>
 
-  if (defaultLoading) return <LoadingSpinner />
-  if (!user || !userDefaultSession) return <div>You must be logged in</div>
+  if (!user.defaultSessionId && currentSessionId) {
+    setDefault.mutate({userId: user.id, sessionId: currentSessionId.id})
+  }
 
   return (
     <>

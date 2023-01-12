@@ -261,11 +261,16 @@ export const climbingSessionRouter = t.router({
           })
         }
 
-        return await ctx.prisma.climbingSession.delete({
-          where: {
-            id: input.id,
-          }
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Cannot delete sessions in the demo version'
         })
+      // Disabled for demo purposes
+      //   return await ctx.prisma.climbingSession.delete({
+      //     where: {
+      //       id: input.id,
+      //     }
+      //   })
       } catch (e) {
         console.log(e)
         throw e

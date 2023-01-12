@@ -169,7 +169,7 @@ model User {
   accounts         Account[]
   sessions         Session[]
   offers           Offer[]   @relation("UserToOffer")
-  defaultSessionId String
+  defaultSessionId String?   @default("clax6vjbb000eovi4u8k1fb0c")
   showCamp         Boolean   @default(false)
 }
 

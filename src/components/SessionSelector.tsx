@@ -32,7 +32,8 @@ const SessionSelector = ({ user }: Props) => {
 
   const useDefaultSession = () => {
     const { isLoading: defaultLoading, data: userDefault } =
-      trpc.climbingSession.getById.useQuery({ id: user.defaultSessionId })
+      // Hard coding Late Fall session ID for demo purposes
+      trpc.climbingSession.getById.useQuery({ id: user.defaultSessionId ?? 'clax6vjbb000eovi4u8k1fb0c' })
 
     const [selectedSession, setSelectedSession] = useAtom(sessionAtom)
 
@@ -54,9 +55,9 @@ const SessionSelector = ({ user }: Props) => {
   if (sessionsLoading || defaultLoading)
     return <div>Loading session data...</div>
   if (!sessions || !userDefault)
-    return <div>There are no climbing sessions in the system!</div>
+    return <div>Please set a default session using the control panel</div>
 
-  const current = sessions.filter(session => session.current)[0] ?? userDefault
+  const current = sessions.find(session => session.current) ?? userDefault
 
   return (
     <>
