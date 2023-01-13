@@ -35,7 +35,7 @@ const SideNav = () => {
     // Sidebar
     // TODO Add button to hide even when widescreen?
     <div
-      className={`sidebar fixed inset-y-0 top-[64px] left-0 z-[1] flex h-[calc(100vh-64px)] w-64 -translate-x-full transform flex-col
+      className={`sidebar fixed inset-y-0 top-[64px] left-0 z-40 flex h-[calc(100vh-64px)] w-64 -translate-x-full transform flex-col
         space-y-6 bg-gray-800 px-2 py-7 text-lg text-gray-100 transition
         duration-200 ease-in-out md:sticky md:top-0 md:h-screen md:translate-x-0`}
     >
