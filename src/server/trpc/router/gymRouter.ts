@@ -214,5 +214,44 @@ export const gymRouter = t.router({
         console.error(e)
         throw e
       }
-    })
+    }),
+
+  getForExport: authedProcedure
+    .input(
+      z.object({
+        sessionId: z.string().cuid(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        return await ctx.prisma.gym.findMany({
+          include: {
+            classes: {
+              where: {
+                sessionId: input.sessionId,
+              },
+              include: {
+                climbers: true,
+              }
+            },
+            waitlistEntries: {
+              include: {
+                climber: true,
+              },
+              orderBy: [
+                {
+                  priority: 'desc',
+                },
+                {
+                  createdAt: 'asc',
+                }
+              ]
+            }
+          }
+        })
+      } catch (e) {
+        console.error(e)
+        throw e
+      }
+    }),
 })

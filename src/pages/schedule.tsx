@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useState } from 'react'
 import ClassAddButton from '../components/ClassAddButton'
 import EmailsButton from '../components/EmailsButton'
+import { ExportSession } from '../components/ExportSession'
 import LoadingSpinner from '../components/LoadingSpinner'
 import NewClassForm from '../components/NewClassForm'
 import Schedule from '../components/Schedule'
@@ -39,6 +40,7 @@ const GymSchedulePage = () => {
         <EmailsButton climbers={climbers} helpText={true} />
         <ClassAddButton toggleFunction={() => toggleIsOpen()} />
       </div>
+      <ExportSession />
       <Dialog
         open={isOpen}
         onClose={() => setIsOpen(false)}
