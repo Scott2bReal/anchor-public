@@ -6,6 +6,8 @@ An application used by the operations team to manage the youth rec program at
 The actual application is currently under active development, so this demo
 version is just a snapshot of its current state as of April 6th, 2023.
 
+![Demo Video](public/demo_recording.gif)
+
 ## Demo Version
 
 The actual application is restricted to the First Ascent Google Workspace. This
