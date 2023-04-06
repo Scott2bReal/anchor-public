@@ -1,17 +1,17 @@
 import toast from "react-hot-toast";
-import { trpc } from "../utils/trpc";
+import { api } from "../utils/api";
 
 export default function useLogger() {
-  const ctx = trpc.useContext()
+  const ctx = api.useContext()
 
-  return trpc.logger.climberLog.useMutation({
+  return api.log.climberLog.useMutation({
     onMutate: async () => {
       await ctx.climber.getById.cancel()
-      await ctx.logger.getClimberLogs.cancel()
+      await ctx.log.getClimberLogs.cancel()
     },
-    onSettled: () => {
-      ctx.climber.getById.invalidate()
-      ctx.logger.getClimberLogs.invalidate()
+    onSettled: async () => {
+      await ctx.climber.getById.invalidate()
+      await ctx.log.getClimberLogs.invalidate()
     },
     onError: (e) => {
       toast.error(`Error adding log entry: ${e.message}`)

@@ -1,4 +1,4 @@
-import { Climber, ClimbingClass } from "@prisma/client";
+import type { Climber, ClimbingClass } from "@prisma/client";
 
 export function generateGymEnrollmentStats(
   climbingClasses: (ClimbingClass & { climbers: Climber[] })[]

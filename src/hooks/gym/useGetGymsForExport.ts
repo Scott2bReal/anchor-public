@@ -1,5 +1,5 @@
-import { trpc } from "../../utils/trpc"
+import { api } from "../../utils/api"
 
 export const useGetGymsForExport = (sessionId: string) => {
-  return trpc.gyms.getForExport.useQuery({sessionId: sessionId})
+  return api.gym.getForExport.useQuery({sessionId: sessionId})
 }

@@ -1,16 +1,16 @@
 import toast from "react-hot-toast"
-import { trpc } from "../../utils/trpc"
+import { api } from "../../utils/api"
 
 export default function useUpdateWaitlistPriority() {
-  const ctx = trpc.useContext()
-  return trpc.waitlist.updatePriority.useMutation({
+  const ctx = api.useContext()
+  return api.waitlist.updatePriority.useMutation({
     onMutate: async () => {
       await ctx.waitlist.getEntriesForGym.cancel()
       await ctx.climber.getById.cancel()
     },
-    onSettled: () => {
-      ctx.waitlist.getEntriesForGym.invalidate()
-      ctx.climber.getById.invalidate()
+    onSettled: async () => {
+      await ctx.waitlist.getEntriesForGym.invalidate()
+      await ctx.climber.getById.invalidate()
 
     },
     onSuccess: () => {

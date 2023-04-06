@@ -1,7 +1,7 @@
-import { Climber, ClimbingClass, Offer, User } from "@prisma/client"
+import type { Climber, ClimbingClass, Offer, User } from "@prisma/client"
 import { useSession } from "next-auth/react"
 import toast from "react-hot-toast"
-import { trpc } from "../utils/trpc"
+import { api } from "../utils/api"
 import useLogger from "./useLogger"
 
 const useDeleteOffer = (offer: (
@@ -12,25 +12,25 @@ const useDeleteOffer = (offer: (
   }
 ) | null,
 ) => {
-  const ctx = trpc.useContext()
+  const ctx = api.useContext()
   const logger = useLogger()
   const session = useSession()
 
   const currentUserName = session?.data?.user?.name ?? 'Someone'
 
-  return trpc.offers.deleteOffer.useMutation({
+  return api.offer.deleteOffer.useMutation({
     onMutate: async () => {
       toast.loading('Deleting offer...')
-      await ctx.gyms.getById.cancel()
-      await ctx.offers.getByGym.cancel()
+      await ctx.gym.getById.cancel()
+      await ctx.offer.getByGym.cancel()
       await ctx.climber.getById.cancel()
-      await ctx.offers.getById.cancel()
+      await ctx.offer.getById.cancel()
     },
-    onSettled: () => {
-      ctx.gyms.getById.invalidate()
-      ctx.offers.getByGym.invalidate()
-      ctx.climber.getById.invalidate()
-      ctx.offers.getById.invalidate()
+    onSettled: async () => {
+      await ctx.gym.getById.invalidate()
+      await ctx.offer.getByGym.invalidate()
+      await ctx.climber.getById.invalidate()
+      await ctx.offer.getById.invalidate()
     },
     onSuccess: () => {
       toast.dismiss()

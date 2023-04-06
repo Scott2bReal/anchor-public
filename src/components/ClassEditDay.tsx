@@ -1,22 +1,25 @@
-import { Listbox } from "@headlessui/react";
-import { ChevronUpDownIcon } from "@heroicons/react/24/solid";
-import { useRef, useState } from "react";
-import toast from "react-hot-toast";
-import { useOnClickOutside } from "usehooks-ts";
-import { cssClassTypeCodes } from "../utils/cssClassTypeCodes";
-import { trpc } from "../utils/trpc";
-import { InlineEditButtons } from "./InlineEditButtons";
+import { Listbox } from '@headlessui/react'
+import { ChevronUpDownIcon } from '@heroicons/react/24/solid'
+import { useRef, useState } from 'react'
+import { useOnClickOutside } from 'usehooks-ts'
+import { useUpdateClassDay } from '../hooks/climbing-class/useUpdateClassDay'
+import { cssClassTypeCodes } from '../utils/cssClassTypeCodes'
+import { InlineEditButtons } from './InlineEditButtons'
 
 type ClassEditDayProps = {
-  classId: string;
-  classType: string;
-  originalDay: string;
-  onRequestClose: () => void;
+  classId: string
+  classType: string
+  originalDay: string
+  onRequestClose: () => void
 }
 
-export const ClassEditDay = ({ classId, classType, originalDay, onRequestClose }: ClassEditDayProps) => {
+export const ClassEditDay = ({
+  classId,
+  classType,
+  originalDay,
+  onRequestClose,
+}: ClassEditDayProps) => {
   const [newDay, setNewDay] = useState(originalDay)
-  const ctx = trpc.useContext()
   const formRef = useRef(null)
   useOnClickOutside(formRef, () => onRequestClose())
 
@@ -32,22 +35,9 @@ export const ClassEditDay = ({ classId, classType, originalDay, onRequestClose }
 
   const classCode = cssClassTypeCodes[classType]
 
-  const editDay = trpc.climbingClass.updateDay.useMutation({
-    onMutate: async () => {
-      ctx.gyms.getForClassInfo.cancel();
-      ctx.gyms.getById.cancel();
-    },
-    onSettled: () => {
-      ctx.gyms.getForClassInfo.invalidate();
-      ctx.gyms.getById.invalidate();
-    },
-    onSuccess: () => {
-      toast.success(`Class switched to ${newDay}`)
-      onRequestClose()
-    },
-    onError: (e) => {
-      toast.error(`Error changing class day: ${e.message}`)
-    }
+  const editDay = useUpdateClassDay({
+    onRequestClose: onRequestClose,
+    newDay: newDay,
   })
 
   return (
@@ -61,29 +51,30 @@ export const ClassEditDay = ({ classId, classType, originalDay, onRequestClose }
             newDay: newDay,
           })
         }}
-        className='relative flex gap-2 items-center justify-start'
+        className='relative flex items-center justify-start gap-2'
         ref={formRef}
       >
-        <Listbox
-          value={newDay}
-          onChange={setNewDay}
-        >
-          <Listbox.Button
-            className='px-2 rounded-lg bg-neutral-100 text-slate-900 inline shadow-md shadow-neutral-900'
-          >
+        <Listbox value={newDay} onChange={setNewDay}>
+          <Listbox.Button className='inline rounded-lg bg-neutral-100 px-2 text-slate-900 shadow-md shadow-neutral-900'>
             {newDay}
-            <ChevronUpDownIcon className="h-4 w-4 inline" />
+            <ChevronUpDownIcon className='inline h-4 w-4' />
           </Listbox.Button>
-          <Listbox.Options
-            className='absolute top-9 rounded-lg bg-neutral-100 text-slate-900 z-[4] shadow-md shadow-neutral-900'
-          >
+          <Listbox.Options className='absolute top-9 z-[4] rounded-lg bg-neutral-100 text-slate-900 shadow-md shadow-neutral-900'>
             {classDays.map((day) => {
               return (
                 <Listbox.Option
                   key={day}
                   value={day}
-                  className={({ active }) => `${active ? `${classCode} text-neutral-100` : 'bg-neutral-100'} hover:cursor-pointer p-1 rounded-lg`}
-                >{day}</Listbox.Option>
+                  className={({ active }) =>
+                    `${
+                      active
+                        ? `${classCode ?? ''} text-neutral-100`
+                        : 'bg-neutral-100'
+                    } rounded-lg p-1 hover:cursor-pointer`
+                  }
+                >
+                  {day}
+                </Listbox.Option>
               )
             })}
           </Listbox.Options>

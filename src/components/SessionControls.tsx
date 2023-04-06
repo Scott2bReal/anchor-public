@@ -1,46 +1,49 @@
-import { Dialog } from "@headlessui/react";
-import { ClimbingSession } from "@prisma/client"
-import { useAtom } from "jotai";
-import { useState } from "react";
-import toast from "react-hot-toast";
-import { sessionAtom } from "../utils/atoms/sessionAtom";
-import { trpc } from "../utils/trpc";
-import DeleteSessionButton from "./DeleteSessionButton";
-import SetCurrentSessionButton from "./SetCurrentSessionButton";
-import { SetUpcomingSessionButton } from "./SetUpcomingSessionButton";
+import { Dialog } from '@headlessui/react'
+import type { ClimbingSession } from '@prisma/client'
+import { useAtom } from 'jotai'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
+import { api } from '../utils/api'
+import { sessionAtom } from '../utils/atoms/sessionAtom'
+import DeleteSessionButton from './DeleteSessionButton'
+import SetCurrentSessionButton from './SetCurrentSessionButton'
+import { SetUpcomingSessionButton } from './SetUpcomingSessionButton'
 
 type SessionControlsProps = {
-  current: ClimbingSession;
-  onRequestClose: () => void;
+  current: ClimbingSession
+  onRequestClose: () => void
 }
 
 const SessionControls = ({ current, onRequestClose }: SessionControlsProps) => {
-  const ctx = trpc.useContext();
-  const [isOpen, setIsOpen] = useState(false);
-  const toggleIsOpen = () => setIsOpen(!isOpen);
+  const ctx = api.useContext()
+  const [isOpen, setIsOpen] = useState(false)
+  const toggleIsOpen = () => setIsOpen(!isOpen)
 
-  const copySchedule = trpc.climbingSession.copyClasses.useMutation({
+  const copySchedule = api.climbingSession.copyClasses.useMutation({
     onMutate: async () => {
-      toast.loading("Copying schedule to new session...")
-      await ctx.gyms.getById.cancel()
+      toast.loading('Copying schedule to new session...')
+      await ctx.gym.getById.cancel()
     },
-    onSettled: () => ctx.gyms.getById.invalidate(),
+    onSettled: async () => await ctx.gym.getById.invalidate(),
     onError: (e) => {
       toast.dismiss()
       toast.error(`Couldn't copy over schedule: ${e.message}`)
     },
     onSuccess: () => {
       toast.dismiss()
-      toast.success("Copied schedule and enrollments to the new session! You may need to refresh the page to see results", {
-        duration: 5000,
-      })
+      toast.success(
+        'Copied schedule and enrollments to the new session! You may need to refresh the page to see results',
+        {
+          duration: 5000,
+        }
+      )
       onRequestClose()
     },
     trpc: {
       context: {
         skipBatch: true,
-      }
-    }
+      },
+    },
   })
 
   const [selectedSession] = useAtom(sessionAtom)
@@ -49,52 +52,71 @@ const SessionControls = ({ current, onRequestClose }: SessionControlsProps) => {
 
   return selectedSession ? (
     <>
-      <div className='flex flex-col gap-2 justify-center items-center'>
+      <div className='flex flex-col items-center justify-center gap-2'>
         <h1 className='text-2xl font-extrabold'>Session Controls</h1>
         <h2 className='text-xl font-bold'>{`Selected Session: ${selectedSession?.name} ${selectedSession?.year}`}</h2>
         <h2 className='text-xl font-bold'>{`Current Session: ${current.name} ${current.year}`}</h2>
-        <div className='flex gap-2 flex-col  '>
+        <div className='flex flex-col gap-2  '>
           <button
-            className='p-2 rounded-lg bg-slate-700 hover:scale-95 transition duration-150 ease-in shadow-md shadow-black'
+            className='rounded-lg bg-slate-700 p-2 shadow-md shadow-black transition duration-150 ease-in hover:scale-95'
             onClick={() => {
               if (current.id === selectedSession?.id) {
-                toast.error("Selected session is the current session")
+                toast.error('Selected session is the current session')
                 return
               } else if (!selectedSession) {
-                toast.error("Please select a session which is not the current session")
+                toast.error(
+                  'Please select a session which is not the current session'
+                )
                 return
               } else {
                 toggleIsOpen()
               }
             }}
-          >Copy Schedule</button>
-          <SetCurrentSessionButton selected={selectedSession} onRequestClose={onRequestClose} />
-          <SetUpcomingSessionButton selected={selectedSession} onRequestClose={onRequestClose} />
-          <DeleteSessionButton current={current} selected={selectedSession} onRequestClose={onRequestClose} />
+          >
+            Copy Schedule
+          </button>
+          {!selectedSession.current ? (
+            <SetCurrentSessionButton
+              selected={selectedSession}
+              onRequestClose={onRequestClose}
+            />
+          ) : (
+            <></>
+          )}
+          {!selectedSession.upcoming && !selectedSession.current ? (
+            <SetUpcomingSessionButton
+              selected={selectedSession}
+              onRequestClose={onRequestClose}
+            />
+          ) : (
+            <></>
+          )}
+          <DeleteSessionButton
+            current={current}
+            selected={selectedSession}
+            onRequestClose={onRequestClose}
+          />
         </div>
       </div>
-      <Dialog
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-      >
-        <div className="z-[4] fixed inset-0 bg-black/50" aria-hidden='true' />
-        <div
-          className='z-[5] fixed inset-0 items-center flex justify-center rounded-lg p-4'
-        >
-          <Dialog.Panel
-            className='z-[4] mx-auto rounded-lg bg-neutral-800 p-6 shadow-md shadow-black'
-          >
-            <div className='flex flex-col gap-2 justify-center items-center'>
-              <h1 className='text-2xl'>This will copy all current classes from</h1>
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
+        <div className='fixed inset-0 z-[4] bg-black/50' aria-hidden='true' />
+        <div className='fixed inset-0 z-[5] flex items-center justify-center rounded-lg p-4'>
+          <Dialog.Panel className='z-[4] mx-auto rounded-lg bg-neutral-800 p-6 shadow-md shadow-black'>
+            <div className='flex flex-col items-center justify-center gap-2'>
+              <h1 className='text-2xl'>
+                This will copy all current classes from
+              </h1>
               <h2 className='text-xl font-extrabold'>{`${current.name} ${current.year} >>> ${selectedSession.name} ${selectedSession.year}.`}</h2>
               <h3 className='text-lg'>Do you want to continue?</h3>
             </div>
-            <div className='flex gap-2 pt-4 justify-evenly'>
+            <div className='flex justify-evenly gap-2 pt-4'>
               <button
-                className='p-2 bg-green-600 rounded-lg flex-1 hover:scale-95 transition duration-150 shadow-md shadow-black'
+                className='flex-1 rounded-lg bg-green-600 p-2 shadow-md shadow-black transition duration-150 hover:scale-95'
                 onClick={() => {
                   if (!selectedSession) {
-                    toast.error("Please select a session which is not the current session")
+                    toast.error(
+                      'Please select a session which is not the current session'
+                    )
                     return
                   } else {
                     copySchedule.mutate({
@@ -103,12 +125,16 @@ const SessionControls = ({ current, onRequestClose }: SessionControlsProps) => {
                     })
                   }
                 }}
-              >Yes</button>
+              >
+                Yes
+              </button>
 
               <button
-                className='p-2 bg-red-600 rounded-lg hover:scale-95 flex-1 transition duration-150 ease-in-out shadow-md shadow-black'
+                className='flex-1 rounded-lg bg-red-600 p-2 shadow-md shadow-black transition duration-150 ease-in-out hover:scale-95'
                 onClick={() => toggleIsOpen()}
-              >No</button>
+              >
+                No
+              </button>
             </div>
           </Dialog.Panel>
         </div>
@@ -116,9 +142,7 @@ const SessionControls = ({ current, onRequestClose }: SessionControlsProps) => {
     </>
   ) : (
     <>
-      {
-        toast.error("Please select a session")
-      }
+      {toast.error('Please select a session')}
       {onRequestClose()}
     </>
   )

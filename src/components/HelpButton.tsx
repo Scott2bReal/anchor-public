@@ -1,14 +1,17 @@
-import { QuestionMarkCircleIcon } from "@heroicons/react/24/solid"
+import { QuestionMarkCircleIcon } from '@heroicons/react/24/solid'
 // import Link from "next/link"
-import { useRouter } from "next/router"
+import { useRouter } from 'next/router'
 
 const HelpButton = () => {
   const info = useRouter().pathname
 
-  if (!info) return <QuestionMarkCircleIcon className="z-[6] h-6 w-6 absolute top-6 right-6 hover:cursor-pointer hover:scale-125 transition ease-in-out" />
+  if (!info)
+    return (
+      <QuestionMarkCircleIcon className='absolute top-6 right-6 z-[6] h-6 w-6 transition ease-in-out hover:scale-125 hover:cursor-pointer' />
+    )
 
   return (
-    <QuestionMarkCircleIcon className="z-[6] h-6 w-6 absolute top-6 right-6 hover:cursor-pointer hover:scale-125 transition ease-in-out" />
+    <QuestionMarkCircleIcon className='absolute top-6 right-6 z-[6] h-6 w-6 transition ease-in-out hover:scale-125 hover:cursor-pointer' />
   )
 }
 

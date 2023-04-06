@@ -1,6 +1,6 @@
 import { useSession } from 'next-auth/react'
 import Head from 'next/head'
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import GymNav from './GymNav'
 import LoadingSpinner from './LoadingSpinner'
 import LogInPrompt from './LogInPrompt'
@@ -8,7 +8,7 @@ import MobileBar from './MobileBar'
 import SideNav from './SideNav'
 
 type LayoutProps = {
-  children: ReactNode;
+  children: ReactNode
 }
 
 export const Layout = ({ children }: LayoutProps) => {
@@ -39,10 +39,10 @@ export const Layout = ({ children }: LayoutProps) => {
         <link rel='icon' href='/favicon.ico' />
       </Head>
       <MobileBar />
-      <main className='relative md:flex'>
+      <main className='relative md:flex md:scrollbar-hide'>
         {/* <HelpButton /> */}
         <SideNav />
-        <div className='flex flex-col justify-start items-center w-full'>
+        <div className='flex w-full flex-col items-center justify-start'>
           <GymNav />
           {children}
         </div>

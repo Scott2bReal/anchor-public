@@ -1,10 +1,10 @@
-import { ClassTypes } from "../types/ClassTypes";
-import { hasKey } from "../utils/hasKey";
+import type { ClassTypes } from '../types/ClassTypes'
+import { hasKey } from '../utils/hasKey'
 
 interface ClassEnrollmentStatsRowProps {
-  stats: Record<string, number>;
-  gymName: string;
-  cssCode?: string;
+  stats: Record<string, number>
+  gymName: string
+  cssCode?: string
 }
 
 const classNames: ClassTypes[] = [
@@ -16,45 +16,44 @@ const classNames: ClassTypes[] = [
   'Spider Monkeys',
 ]
 
-
-const ClassEnrollmentStatsRow = ({ stats, gymName, cssCode }: ClassEnrollmentStatsRowProps) => {
+const ClassEnrollmentStatsRow = ({
+  stats,
+  gymName,
+  cssCode,
+}: ClassEnrollmentStatsRowProps) => {
   const totalEnrolled = Object.keys(stats).reduce((acc, className) => {
-      const num = stats[className] as number
-      return acc + num
-    }, 0)
+    const num = stats[className] as number
+    return acc + num
+  }, 0)
 
   return gymName === 'allGyms' ? (
-    <tr className={`border-[1px] font-bold text-xl`}>
+    <tr className={`border-[1px] text-xl font-bold`}>
       <th className={`font-bold`}>All Gyms</th>
-      {
-        classNames.sort().map(className => {
-          return !hasKey(stats, className) ? (
-            <td key={className + gymName}>0</td>
-          ) : (
-            <td key={className + gymName}>{stats[className]}</td>
-          )
-        })
-      }
+      {classNames.sort().map((className, idx) => {
+        return !hasKey(stats, className) ? (
+          <td key={`${idx} ${gymName}`}>0</td>
+        ) : (
+          <td key={idx}>{stats[className]}</td>
+        )
+      })}
       <td>{totalEnrolled}</td>
     </tr>
   ) : (
-    <tr className={`border-[1px] ${cssCode} text-xl `}>
+    <tr className={`border-[1px] ${cssCode ?? ''} text-xl `}>
       <th className={`font-bold`}>{gymName}</th>
-      {
-        classNames.sort().map(className => {
-          return !hasKey(stats, className) ? (
-            <td key={className + gymName}>0</td>
-          ) : (
-            <td key={className + gymName}>{stats[className]}</td>
-          )
-        })
-      }
-        <td className={'font-bold'}>{
-          Object.keys(stats).reduce((acc, className) => {
-            const num = stats[className] as number
-            return acc + num
-          }, 0)
-        }</td>
+      {classNames.sort().map((className) => {
+        return !hasKey(stats, className) ? (
+          <td key={gymName}>0</td>
+        ) : (
+          <td key={className + gymName}>{stats[className]}</td>
+        )
+      })}
+      <td className={'font-bold'}>
+        {Object.keys(stats).reduce((acc, className) => {
+          const num = stats[className] as number
+          return acc + num
+        }, 0)}
+      </td>
     </tr>
   )
 }

@@ -9,7 +9,9 @@ const MobileBar = () => {
   const { data: session } = useSession()
 
   return session ? (
-    <div className={`sticky top-0 h-[${mobileBarHeight}] z-[1] md:hidden bg-gray-800 text-gray-100`}>
+    <div
+      className={`sticky top-0 h-[${mobileBarHeight}] z-[1] bg-gray-800 text-gray-100 md:hidden`}
+    >
       <button onClick={() => toggleSidebar()} className='p-4'>
         <Bars3Icon className='h-8 w-8'></Bars3Icon>
       </button>

@@ -1,17 +1,16 @@
 import toast from "react-hot-toast"
-import { trpc } from "../../utils/trpc"
+import { api } from "../../utils/api"
 
 export default function useUpdateWaitlistAdded() {
-  const ctx = trpc.useContext()
-  return trpc.waitlist.updateAdded.useMutation({
+  const ctx = api.useContext()
+  return api.waitlist.updateAdded.useMutation({
     onMutate: async () => {
       await ctx.waitlist.getEntriesForGym.cancel()
       await ctx.climber.getById.cancel()
     },
-    onSettled: () => {
-      ctx.waitlist.getEntriesForGym.invalidate()
-      ctx.climber.getById.invalidate()
-
+    onSettled: async () => {
+      await ctx.waitlist.getEntriesForGym.invalidate()
+      await ctx.climber.getById.invalidate()
     },
     onSuccess: () => {
       toast.success('Updated date added')

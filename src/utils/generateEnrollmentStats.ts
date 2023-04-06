@@ -1,4 +1,4 @@
-import { Climber, ClimbingClass } from "@prisma/client";
+import type { Climber, ClimbingClass } from "@prisma/client";
 import { generateGymEnrollmentStats } from "./generateGymEnrollmentStats";
 
 export function generateEnrollmentStats(

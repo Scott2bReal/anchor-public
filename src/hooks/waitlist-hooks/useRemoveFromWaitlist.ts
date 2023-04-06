@@ -1,6 +1,6 @@
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
-import { trpc } from "../../utils/trpc";
+import { api } from "../../utils/api";
 import useLogger from "../useLogger";
 
 type RemoveFromWaitlistProps = {
@@ -8,18 +8,18 @@ type RemoveFromWaitlistProps = {
 };
 
 export default function useRemoveFromWaitlist({ classType }: RemoveFromWaitlistProps) {
-  const ctx = trpc.useContext()
+  const ctx = api.useContext()
   const logger = useLogger()
   const {data: session} = useSession()
   const user = session?.user
 
-  return trpc.waitlist.remove.useMutation({
+  return api.waitlist.remove.useMutation({
     onMutate: async () => {
       toast.loading('Removing from waitlist...')
       await ctx.waitlist.getEntriesForGym.cancel()
     },
-    onSettled: () => {
-      ctx.waitlist.getEntriesForGym.invalidate()
+    onSettled: async () => {
+      await ctx.waitlist.getEntriesForGym.invalidate()
     },
     onSuccess: ({ climberId }) => {
       toast.dismiss()
@@ -28,7 +28,7 @@ export default function useRemoveFromWaitlist({ classType }: RemoveFromWaitlistP
       logger.mutate({
         climberId: climberId,
         // There will always be a user...
-        message: `${user ? user.name : 'Someone'} - Removed from the ${classType} waitlist`,
+        message: `${user?.name ? user.name : 'Someone'} - Removed from the ${classType} waitlist`,
       })
     },
     onError: (e) => {

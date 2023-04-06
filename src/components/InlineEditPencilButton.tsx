@@ -1,13 +1,15 @@
-import { PencilSquareIcon } from "@heroicons/react/24/solid";
+import { PencilSquareIcon } from '@heroicons/react/24/solid'
 
 type InlineEditPencilButtonProps = {
-  openFunction: () => void;
+  openFunction: () => void
 }
 
-export const InlineEditPencilButton = ({ openFunction }: InlineEditPencilButtonProps) => {
+export const InlineEditPencilButton = ({
+  openFunction,
+}: InlineEditPencilButtonProps) => {
   return (
     <button
-      className={`hover:opacity-75 transition duration-150 ease-in-out`}
+      className={`transition duration-150 ease-in-out hover:opacity-75`}
       onClick={() => {
         openFunction()
       }}

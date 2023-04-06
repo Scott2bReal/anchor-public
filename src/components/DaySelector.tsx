@@ -1,5 +1,6 @@
-import { Switch } from "@headlessui/react"
-import { Dispatch, SetStateAction, useState } from "react"
+import { Switch } from '@headlessui/react'
+import type { Dispatch, SetStateAction } from 'react'
+import { useState } from 'react'
 
 const DaySelector = () => {
   const [monday, setMonday] = useState(false)
@@ -10,7 +11,9 @@ const DaySelector = () => {
   const [saturday, setSaturday] = useState(false)
   const [sunday, setSunday] = useState(false)
 
-  const days: { [idx: string]: { state: boolean, setter: Dispatch<SetStateAction<boolean>> } } = {
+  const days: {
+    [idx: string]: { state: boolean; setter: Dispatch<SetStateAction<boolean>> }
+  } = {
     Monday: { state: monday, setter: setMonday },
     Tuesday: { state: tuesday, setter: setTuesday },
     Wednesday: { state: wednesday, setter: setWednesday },
@@ -22,22 +25,22 @@ const DaySelector = () => {
 
   return (
     <div className='flex flex-col items-center justify-center gap-2'>
-      <div className='flex gap-2 items-center justify-center'>
+      <div className='flex items-center justify-center gap-2'>
         <h2 className='text-lg font-bold'>Availability</h2>
       </div>
-      <div className='flex gap-2 items-center justify-center'>
-        {
-          Object.keys(days).map((day) => {
-            return <Switch
+      <div className='flex items-center justify-center gap-2'>
+        {Object.keys(days).map((day) => {
+          return (
+            <Switch
               key={day}
               checked={days[day]?.state}
               onChange={days[day]?.setter}
-              className='hover:bg-gray-500 transition duration-150 ease-in-out p-2 bg-gray-800 ui-checked:bg-gray-500 rounded-lg'
+              className='rounded-lg bg-gray-800 p-2 transition duration-150 ease-in-out hover:bg-gray-500 ui-checked:bg-gray-500'
             >
               {day}
             </Switch>
-          })
-        }
+          )
+        })}
       </div>
     </div>
   )

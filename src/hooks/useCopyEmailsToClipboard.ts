@@ -26,7 +26,7 @@ function useCopyEmailsToClipboard(): [CopiedValue, CopyFn] {
     } catch (error) {
       console.warn('Copy failed', error)
       setCopiedText(null)
-      toast.error(`Error copying text to clipboard: ${error}`)
+      toast.error(`Error copying text to clipboard`)
       return false
     }
   }

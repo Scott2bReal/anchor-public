@@ -1,22 +1,22 @@
 import toast from "react-hot-toast"
-import { trpc } from "../../utils/trpc"
+import { api } from "../../utils/api"
 import useFindClimber from "../useFindClimber"
 
 export default function useUpdateWaitlistAvails(climberId: string) {
-const ctx = trpc.useContext()
+const ctx = api.useContext()
 const { data: climber } = useFindClimber(climberId)
 
-return trpc.waitlist.updateAvailability.useMutation({
+return api.waitlist.updateAvailability.useMutation({
     onMutate: async () => {
       await ctx.waitlist.getEntriesForGym.cancel()
       await ctx.climber.getById.cancel()
     },
-    onSettled: () => {
-      ctx.waitlist.getEntriesForGym.invalidate()
-      ctx.climber.getById.invalidate()
+    onSettled: async () => {
+      await ctx.waitlist.getEntriesForGym.invalidate()
+      await ctx.climber.getById.invalidate()
     },
     onSuccess: () => {
-      toast.success(`Updated availability for ${climber?.name}`)
+      toast.success(`Updated availability for ${climber?.name ?? 'a climber'}`)
     },
     onError: (e) => {
       toast.error(`Error updating availability: ${e.message}`)

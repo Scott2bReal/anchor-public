@@ -1,7 +1,7 @@
-import { NextApiRequest, NextApiResponse } from 'next'
+import type { NextApiRequest, NextApiResponse } from 'next'
 import isValidSlackRequest from '../../../utils/slack/isValidSlackRequest'
 import { greetingMessage } from '../../../utils/slack/messages'
-import slackAPI from '../../../utils/slackAPI'
+import slackAPI from '../../../utils/slack/slackAPI'
 
 type SlackEventType =
   | 'app_mention'
@@ -9,6 +9,7 @@ type SlackEventType =
   | 'reaction_removed'
   | 'member_joined_channel'
   | 'app_home_opened'
+  | 'url_verification'
 
 type SlackEvent = {
   type: SlackEventType
@@ -39,6 +40,7 @@ export interface SlackEventPayload {
   api_app_id: string
   event: MemberJoinedEvent | ReactionEvent
   type: string
+  challenge?: string
   authorizations: object[]
   event_context: string
   event_id: string
@@ -52,20 +54,21 @@ export default async function events(
   // Verify request is legit from Slack to our bot
   if (isValidSlackRequest(req)) {
 
+    const body = req.body as SlackEventPayload
+
     // Handle validation or bad requests
-    if (!Object.keys(req.body).includes('type')) {
+    if (!('type' in body)) {
       return res.status(400).send('Invalid request format')
-    } else if (req.body.type === 'url_verification') {
-      const challenge = req.body.challenge
+    }
+
+    if ('challenge' in body && body.type === 'url_verification') {
+      const challenge = body.challenge
       return res.status(200).send(challenge)
     } else {
 
-      // Request looks good, start processing!
-      const payload: SlackEventPayload = req.body
-
       // Event handlers
-      if (payload.event.type === 'member_joined_channel') {
-        const event = payload.event as MemberJoinedEvent
+      if (body.event.type === 'member_joined_channel') {
+        const event = body.event as MemberJoinedEvent
 
         // Send greeting to reminders channel
         // Channel check might be unecessary, but just to be sure!

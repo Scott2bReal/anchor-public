@@ -16,13 +16,15 @@ datasource db {
 }
 
 model Gym {
-  id              String          @id @default(cuid())
-  name            String          @unique
-  cssCode         String
-  classes         ClimbingClass[] @relation("GymsToClasses")
-  waitlistEntries WaitlistEntry[] @relation("GymsToWaitlist")
-  offers          Offer[]         @relation("GymToOffer")
-  campWeeks       CampWeek[]      @relation("GymsToCampWeek")
+  id                  String              @id @default(cuid())
+  name                String              @unique
+  cssCode             String
+  classes             ClimbingClass[]     @relation("GymsToClasses")
+  waitlistEntries     WaitlistEntry[]     @relation("GymsToWaitlist")
+  offers              Offer[]             @relation("GymToOffer")
+  campOffers          CampOffer[]         @relation("GymToCampOffer")
+  campWeeks           CampWeek[]          @relation("GymsToCampWeek")
+  campWaitlistEntries CampWaitlistEntry[] @relation("CampWaitlistEntryToGym")
 }
 
 model ClimbingClass {
@@ -40,17 +42,21 @@ model ClimbingClass {
   climbingSession ClimbingSession @relation("SessionToClass", fields: [sessionId], references: [id], onDelete: Cascade)
   sessionId       String
   offers          Offer[]         @relation("OfferToClass")
+  timeZone        String
 }
 
 model Climber {
-  id              String          @id @default(cuid())
-  name            String
-  classes         ClimbingClass[]
-  parentEmail     String
-  waitlistEntries WaitlistEntry[] @relation("ClimberToWaitlist")
-  offers          Offer[]         @relation("OfferToClimber")
-  logs            ClimberLog[]    @relation("ClimberToLogEntry")
-  campWeeks       CampWeek[]
+  id                  String              @id @default(cuid())
+  name                String
+  classes             ClimbingClass[]
+  parentEmail         String
+  waitlistEntries     WaitlistEntry[]     @relation("ClimberToWaitlist")
+  offers              Offer[]             @relation("OfferToClimber")
+  campOffers          CampOffer[]         @relation("ClimberToCampOffer")
+  logs                ClimberLog[]        @relation("ClimberToLogEntry")
+  notes               String?
+  campWeeks           CampWeek[]
+  campWaitlistEntries CampWaitlistEntry[] @relation("ClimberToCampWeekWaitlistEntry")
 
   @@unique([name, parentEmail])
 }
@@ -76,6 +82,42 @@ model WaitlistEntry {
   @@unique([gymId, climberId, classType])
 }
 
+model CampWaitlistEntry {
+  id           String   @id @default(cuid())
+  gymId        String
+  gym          Gym      @relation("CampWaitlistEntryToGym", fields: [gymId], references: [id], onDelete: Cascade)
+  climberId    String
+  climber      Climber  @relation("ClimberToCampWeekWaitlistEntry", fields: [climberId], references: [id], onDelete: Cascade)
+  priority     Boolean  @default(false)
+  notes        String?
+  createdAt    DateTime @default(now())
+  year         Int
+  availability String[]
+
+  @@unique([gymId, climberId, year])
+}
+
+model CampWeek {
+  id         String      @id @default(cuid())
+  weekNumber Int
+  year       Int
+  startDate  DateTime
+  endDate    DateTime
+  gym        Gym         @relation("GymsToCampWeek", fields: [gymId], references: [id], onDelete: Cascade)
+  gymId      String
+  climbers   Climber[]
+  instructor String
+  slots      Int
+  campOffers CampOffer[] @relation("CampWeekToCampOffer")
+
+  @@unique([gymId, weekNumber, year])
+}
+
+model CampWeekYear {
+  id   String @id @default(cuid())
+  year Int    @unique
+}
+
 model Offer {
   id            String        @id @default(cuid())
   user          User          @relation("UserToOffer", fields: [userId], references: [id], onDelete: Cascade)
@@ -93,6 +135,25 @@ model Offer {
   updatedAt     DateTime      @updatedAt
 
   @@unique([climberId, classId])
+}
+
+model CampOffer {
+  id            String   @id @default(cuid())
+  user          User     @relation("UserToCampOffer", fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  gym           Gym      @relation("GymToCampOffer", fields: [gymId], references: [id], onDelete: Cascade)
+  gymId         String
+  campWeek      CampWeek @relation("CampWeekToCampOffer", fields: [weekId], references: [id], onDelete: Cascade)
+  weekId        String
+  climber       Climber  @relation("ClimberToCampOffer", fields: [climberId], references: [id], onDelete: Cascade)
+  climberId     String
+  notes         String
+  zendeskTicket String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  expiration    DateTime
+
+  @@unique([climberId, weekId])
 }
 
 model ClimberLog {
@@ -114,23 +175,9 @@ model ClimbingSession {
   upcoming        Boolean         @default(false)
   createdAt       DateTime        @default(now())
   climbingClasses ClimbingClass[] @relation("SessionToClass")
+  default         Boolean         @default(false)
 
   @@unique([name, year])
-}
-
-model CampWeek {
-  id         String    @id @default(cuid())
-  weekNumber Int
-  year       Int
-  startDate  DateTime
-  endDate    DateTime
-  gym        Gym       @relation("GymsToCampWeek", fields: [gymId], references: [id], onDelete: Cascade)
-  gymId      String
-  climbers   Climber[]
-  instructor String
-  slots      Int
-
-  @@unique([gymId, weekNumber])
 }
 
 // Necessary for Next auth
@@ -161,16 +208,17 @@ model Session {
 }
 
 model User {
-  id               String    @id @default(cuid())
+  id               String      @id @default(cuid())
   name             String?
-  email            String?   @unique
+  email            String?     @unique
   emailVerified    DateTime?
   image            String?
   accounts         Account[]
   sessions         Session[]
-  offers           Offer[]   @relation("UserToOffer")
-  defaultSessionId String?   @default("clax6vjbb000eovi4u8k1fb0c")
-  showCamp         Boolean   @default(false)
+  offers           Offer[]     @relation("UserToOffer")
+  campOffers       CampOffer[] @relation("UserToCampOffer")
+  defaultSessionId String      @default("")
+  showCamp         Boolean     @default(false)
 }
 
 model VerificationToken {

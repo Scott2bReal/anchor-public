@@ -1,9 +1,12 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
 import isValidSlackRequest from "../../../utils/slack/isValidSlackRequest";
+import type { SlackEventPayload } from "./events";
 
 export default function actions(req: NextApiRequest, res: NextApiResponse) {
   if (isValidSlackRequest(req)) {
-    if (!req.body || !req.body.payload) {
+    const body = req.body as SlackEventPayload
+
+    if (!body) {
       return res.status(400).send('Invalid request format')
     }
 

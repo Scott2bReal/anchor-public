@@ -1,5 +1,5 @@
 import * as crypto from "crypto"
-import { NextApiRequest } from "next";
+import type { NextApiRequest } from "next";
 
 function isRecentRequest(timestamp: string) {
   // Convert time to seconds to match timestamp
@@ -24,6 +24,8 @@ export default function isValidSlackRequest(req: NextApiRequest) {
 
   if (!timestamp || !signature) return false
 
+  const timestampString = Array.isArray(timestamp) && timestamp[0] ? timestamp[0] : ''
+
   // Slack docs tell us this will always be 'v0'
   const version = 'v0'
 
@@ -38,7 +40,7 @@ export default function isValidSlackRequest(req: NextApiRequest) {
     .on('end', () => {
       const hmac = crypto
         .createHmac('sha256', signingSecret)
-        .update(`${version}:${timestamp}:${rawBody}`)
+        .update(`${version}:${timestampString ?? timestamp}:${rawBody}`)
         .digest('hex')
       return `${version}=${hmac}` === signature
     })

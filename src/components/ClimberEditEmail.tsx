@@ -1,40 +1,27 @@
-import { useRef, useState } from "react";
-import toast from "react-hot-toast";
-import { useOnClickOutside } from "usehooks-ts";
-import { trpc } from "../utils/trpc";
-import { InlineEditButtons } from "./InlineEditButtons";
+import { useRef, useState } from 'react'
+import { useOnClickOutside } from 'usehooks-ts'
+import { useClimberUpdateEmail } from '../hooks/waitlist-hooks/useClimberUpdateEmail'
+import { InlineEditButtons } from './InlineEditButtons'
 
 type ClimberEditEmailProps = {
-  climberId: string;
-  originalEmail: string;
-  onRequestClose: () => void;
+  climberId: string
+  originalEmail: string
+  onRequestClose: () => void
 }
 
-export const ClimberEditEmail = ({ climberId, originalEmail, onRequestClose }: ClimberEditEmailProps) => {
+export const ClimberEditEmail = ({
+  climberId,
+  originalEmail,
+  onRequestClose,
+}: ClimberEditEmailProps) => {
   const [newEmail, setNewEmail] = useState(originalEmail)
-  const ctx = trpc.useContext()
-
   const formRef = useRef(null)
   useOnClickOutside(formRef, () => onRequestClose())
 
-  const updateEmail = trpc.climber.updateParentEmail.useMutation({
-    onMutate: async () => {
-      await ctx.climber.getById.cancel()
-    },
-    onSettled: () => {
-      ctx.climber.getById.invalidate()
-    },
-    onSuccess: () => {
-      toast.success('Updated climber\' parent email')
-      onRequestClose()
-    },
-    onError: (e) => {
-      toast.error(`Error updating name: ${e.message}`)
-    }
-  })
+  const updateEmail = useClimberUpdateEmail(onRequestClose)
 
   return (
-    <div className='flex gap-2 justify-center items-center p-2'>
+    <div className='flex items-center justify-center gap-2 p-2'>
       <h1 className='text-2xl font-bold'>Edit Parent Email</h1>
       <form
         onSubmit={(e) => {
@@ -52,7 +39,7 @@ export const ClimberEditEmail = ({ climberId, originalEmail, onRequestClose }: C
           }}
           placeholder={originalEmail}
           autoFocus
-          className='text-slate-900 px-2 rounded-lg'
+          className='rounded-lg px-2 text-slate-900'
         />
         <InlineEditButtons onRequestClose={onRequestClose} />
       </form>

@@ -1,16 +1,20 @@
-import { useRef, useState } from "react";
-import { useOnClickOutside } from "usehooks-ts";
-import useUpdateWaitlistAdded from "../hooks/waitlist-hooks/useUpdateWaitlistAdded";
-import { formatDateFromInput } from "../utils/formatDateFromInput";
-import { InlineEditButtons } from "./InlineEditButtons";
+import { useRef, useState } from 'react'
+import { useOnClickOutside } from 'usehooks-ts'
+import useUpdateWaitlistAdded from '../hooks/waitlist-hooks/useUpdateWaitlistAdded'
+import { formatDateFromInput } from '../utils/formatDateFromInput'
+import { InlineEditButtons } from './InlineEditButtons'
 
 type WaitlistEditDateProps = {
-  entryId: string;
-  originalDate: Date;
-  onRequestClose: () => void;
+  entryId: string
+  originalDate: Date
+  onRequestClose: () => void
 }
 
-const WaitlistEditDate = ({ entryId, originalDate, onRequestClose }: WaitlistEditDateProps) => {
+const WaitlistEditDate = ({
+  entryId,
+  originalDate,
+  onRequestClose,
+}: WaitlistEditDateProps) => {
   const formRef = useRef(null)
   useOnClickOutside(formRef, () => onRequestClose())
   const updateAdded = useUpdateWaitlistAdded()
@@ -18,7 +22,9 @@ const WaitlistEditDate = ({ entryId, originalDate, onRequestClose }: WaitlistEdi
 
   return (
     <>
-      <label htmlFor='entryDate' className='inline font-bold text-xl'>Edit Date Added: </label>
+      <label htmlFor='entryDate' className='inline text-xl font-bold'>
+        Edit Date Added:{' '}
+      </label>
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -36,9 +42,9 @@ const WaitlistEditDate = ({ entryId, originalDate, onRequestClose }: WaitlistEdi
           type='date'
           autoFocus
           onChange={(e) => setAdded(formatDateFromInput(e.target.value))}
-          className='text-neutral-900 px-2 py-1 rounded-lg'
+          className='rounded-lg px-2 py-1 text-neutral-900'
         />
-      <InlineEditButtons onRequestClose={onRequestClose} />
+        <InlineEditButtons onRequestClose={onRequestClose} />
       </form>
     </>
   )

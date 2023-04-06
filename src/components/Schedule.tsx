@@ -1,24 +1,33 @@
-import { Climber, ClimbingClass, Gym, Offer, WaitlistEntry } from '@prisma/client';
-import { ClassDay } from '../types/ClassDay';
-import ClassCard from './ClassCard';
-import EmailsButton from './EmailsButton';
+import type {
+  Climber,
+  ClimbingClass,
+  Gym,
+  Offer,
+  WaitlistEntry,
+} from "@prisma/client";
+import type { ClassDay } from "../types/ClassDay";
+import ClassCard from "./ClassCard";
+import EmailsButton from "./EmailsButton";
 
 interface ScheduleProps {
-  gym: Gym & { classes: (ClimbingClass & { climbers: Climber[], offers: Offer[], })[], waitlistEntries: WaitlistEntry[] };
+  gym: Gym & {
+    classes: (ClimbingClass & { climbers: Climber[]; offers: Offer[] })[];
+    waitlistEntries: WaitlistEntry[];
+  };
 }
 
 const Schedule = ({ gym }: ScheduleProps) => {
   const days: Array<ClassDay> = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday',
-  ]
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
 
-  type ClassByDay =  ClimbingClass & { climbers: Climber[], offers: Offer[] };
+  type ClassByDay = ClimbingClass & { climbers: Climber[]; offers: Offer[] };
 
   // Can I make an object that contains key of day, value array of classes on that day?
   const classesByDay: { [idx: string]: Array<ClassByDay> } = {
@@ -29,31 +38,40 @@ const Schedule = ({ gym }: ScheduleProps) => {
     Friday: new Array<ClassByDay>(),
     Saturday: new Array<ClassByDay>(),
     Sunday: new Array<ClassByDay>(),
-  }
+  };
 
   gym.classes.forEach((climbingClass) => {
-    classesByDay[climbingClass.day]?.push(climbingClass)
-  })
+    classesByDay[climbingClass.day]?.push(climbingClass);
+  });
 
   return (
-    <div className="grid grid-cols-7 gap-2 max-h-[75vh] overflow-scroll max-w-[calc(100vw - 256px)] p-4 place-content-between">
+    <div className="max-w-[calc(100vw - 256px)] grid max-h-[75vh] grid-cols-7 place-content-between gap-2 overflow-scroll p-4">
       {days.map((day) => {
-        const climbers = classesByDay[day]?.map((climbingClass) => { return climbingClass.climbers }).flat();
+        const climbers = classesByDay[day]
+          ?.map((climbingClass) => {
+            return climbingClass.climbers;
+          })
+          .flat();
         return (
           <div
             key={day}
-            className='col-auto flex flex-col gap-2 justify-start items-center'
+            className="col-auto flex flex-col items-center justify-start gap-2"
           >
-            <h2 className='hover:cursor-default font-bold'>{day}</h2>
+            <h2 className="font-bold hover:cursor-default">{day}</h2>
             <EmailsButton climbers={climbers ?? []} />
             {classesByDay[day]?.map((climbingClass) => {
-              return <ClassCard key={climbingClass.id} climbingClass={climbingClass} />
+              return (
+                <ClassCard
+                  key={climbingClass.id}
+                  climbingClass={climbingClass}
+                />
+              );
             })}
           </div>
-        )
+        );
       })}
     </div>
-  )
-}
+  );
+};
 
-export default Schedule
+export default Schedule;

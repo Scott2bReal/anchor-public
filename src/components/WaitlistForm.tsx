@@ -1,21 +1,24 @@
 import { Switch } from '@headlessui/react'
-import { SetStateAction } from 'jotai'
+import type { SetStateAction } from 'jotai'
 import { useSession } from 'next-auth/react'
-import { Dispatch, useState } from 'react'
+import type { Dispatch } from 'react'
+import { useState } from 'react'
 import toast from 'react-hot-toast'
+import { useGetGymForClassInfo } from '../hooks/gym/useGetGymForClassInfo'
+import { useGetGymsForGymNav } from '../hooks/gym/useGetGymsForGymNav'
 import useFindClimber from '../hooks/useFindClimber'
 import useLogger from '../hooks/useLogger'
+import { api } from '../utils/api'
 import { cssClassTypeCodes } from '../utils/cssClassTypeCodes'
-import { trpc } from '../utils/trpc'
 import { ClassTypeSelector } from './ClassTypeSelector'
 import { GymSelector } from './GymSelector'
 import LoadingSpinner from './LoadingSpinner'
 
 type WaitlistFormProps = {
-  climberId: string;
-  gymId: string;
-  classType: string;
-  closeOnRequest: () => void;
+  climberId: string
+  gymId: string
+  classType: string
+  closeOnRequest: () => void
 }
 
 const WaitlistForm = ({
@@ -24,10 +27,11 @@ const WaitlistForm = ({
   closeOnRequest,
   classType,
 }: WaitlistFormProps) => {
-  const { isLoading: climberLoading, data: selectedClimber } = useFindClimber(climberId)
+  const { isLoading: climberLoading, data: selectedClimber } =
+    useFindClimber(climberId)
   const { isLoading: gymLoading, data: selectedGym } =
-    trpc.gyms.getForClassInfo.useQuery({ id: gymId })
-  const { isLoading: gymsLoading, data: gyms } = trpc.gyms.getForGymNav.useQuery()
+    useGetGymForClassInfo(gymId)
+  const { isLoading: gymsLoading, data: gyms } = useGetGymsForGymNav()
   const { data: session } = useSession()
   const user = session?.user
 
@@ -43,7 +47,9 @@ const WaitlistForm = ({
   const [saturday, setSaturday] = useState(false)
   const [sunday, setSunday] = useState(false)
 
-  const days: { [idx: string]: { state: boolean, setter: Dispatch<SetStateAction<boolean>> } } = {
+  const days: {
+    [idx: string]: { state: boolean; setter: Dispatch<SetStateAction<boolean>> }
+  } = {
     Monday: { state: monday, setter: setMonday },
     Tuesday: { state: tuesday, setter: setTuesday },
     Wednesday: { state: wednesday, setter: setWednesday },
@@ -55,15 +61,15 @@ const WaitlistForm = ({
 
   const cssCode = cssClassTypeCodes[classType]
 
-  const ctx = trpc.useContext()
+  const ctx = api.useContext()
 
-  const addToWaitlist = trpc.waitlist.putClimberOnWaitlist.useMutation({
+  const addToWaitlist = api.waitlist.putClimberOnWaitlist.useMutation({
     onMutate: async () => {
       toast.loading('Adding to waitlist...')
       await ctx.waitlist.getEntriesForGym.cancel()
     },
-    onSettled: () => {
-      ctx.waitlist.getEntriesForGym.invalidate()
+    onSettled: async () => {
+      await ctx.waitlist.getEntriesForGym.invalidate()
     },
     onError: (e) => {
       toast.dismiss()
@@ -71,25 +77,33 @@ const WaitlistForm = ({
     },
     onSuccess: ({ classType }) => {
       toast.dismiss()
-      toast.success(`Added ${selectedClimber ? selectedClimber.name : 'climber'} to the  ${classType} waitlist`)
+      toast.success(
+        `Added ${
+          selectedClimber ? selectedClimber.name : 'climber'
+        } to the  ${classType} waitlist`
+      )
       closeOnRequest()
       logger.mutate({
         climberId: climberId,
-        message: `${user?.name} - Added to the ${selectedGym?.name} ${classType} waitlist`
+        message: `${user?.name ?? 'Someone'} - Added to the ${
+          selectedGym?.name ?? ''
+        } ${classType} waitlist`,
       })
-    }
+    },
   })
 
   if (climberLoading || gymLoading || gymsLoading) {
-    return <div className='flex flex-col gap-4'>
-      <LoadingSpinner />
-    </div>
+    return (
+      <div className='flex flex-col gap-4'>
+        <LoadingSpinner />
+      </div>
+    )
   }
 
   if (!selectedClimber || !selectedGym || !gyms) return <></>
 
   return (
-    <div className='max-h-[95vh] text-center overflow-scroll'>
+    <div className='max-h-[95vh] overflow-scroll text-center'>
       <h2 className='text-xl font-bold'>
         Add {selectedClimber.name} to the Waitlist
       </h2>
@@ -117,7 +131,7 @@ const WaitlistForm = ({
         }}
       >
         {/* Auto-selected info */}
-        <div className='max-w-fit mx-auto p-2 text-start'>
+        <div className='mx-auto max-w-fit p-2 text-start'>
           <GymSelector gyms={gyms} selectedGym={selectedGym} />
           <ClassTypeSelector />
         </div>
@@ -136,53 +150,58 @@ const WaitlistForm = ({
             >
               <span className='sr-only'>Priority</span>
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-150 ease-in-out ${priorityEnabled ? 'translate-x-6' : 'translate-x-1'
-                  }`}
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-150 ease-in-out ${
+                  priorityEnabled ? 'translate-x-6' : 'translate-x-1'
+                }`}
               ></span>
             </Switch>
           </Switch.Group>
         </div>
 
         <div className='flex flex-col items-center justify-center gap-2'>
-          <div className='flex gap-2 items-center justify-center'>
+          <div className='flex items-center justify-center gap-2'>
             <h2 className='text-lg font-bold'>Availability</h2>
           </div>
-          <div className='flex gap-2 items-center justify-center'>
-            {
-              Object.keys(days).map((day) => {
-                return <Switch
+          <div className='flex items-center justify-center gap-2'>
+            {Object.keys(days).map((day) => {
+              return (
+                <Switch
                   key={day}
                   checked={days[day]?.state}
                   onChange={days[day]?.setter}
-                  className={`hover:scale-95 transition duration-150 ease-in-out p-2 ${cssCode} ui-not-checked:bg-gray-800 rounded-lg shadow-neutral-900 shadow-md`}
+                  className={`p-2 transition duration-150 ease-in-out hover:scale-95 ${
+                    cssCode ?? ''
+                  } rounded-lg shadow-md shadow-neutral-900 ui-not-checked:bg-gray-800`}
                 >
                   {day}
                 </Switch>
-              })
-            }
+              )
+            })}
           </div>
         </div>
 
-        <div className='flex flex-col justify-center items-center p-2'>
+        <div className='flex flex-col items-center justify-center p-2'>
           <label className='block text-lg font-bold' htmlFor='notes'>
             Notes
           </label>
           <textarea
             name='notes'
-            className='bg-neutral-100 text-slate-900 rounded-lg p-2 w-full shadow-md shadow-neutral-900'
+            className='w-full rounded-lg bg-neutral-100 p-2 text-slate-900 shadow-md shadow-neutral-900'
             onChange={(e) => setNotes(e.target.value)}
           ></textarea>
         </div>
 
         <button
           type='submit'
-          className='mx-auto mt-4 block rounded-lg bg-gray-800 p-1 text-neutral-100 hover:scale-95 shadow-md shadow-neutral-900'
+          className={`mx-auto mt-4 block rounded-lg ${
+            cssCode ?? 'bg-gray-800'
+          } p-1 text-neutral-100 shadow-md shadow-neutral-900 hover:scale-95`}
         >
           Add to Wait List
         </button>
       </form>
       <button
-        className='mx-auto m-2 block rounded-lg bg-gray-800 p-1 text-neutral-100 hover:scale-95 shadow-md shadow-neutral-900'
+        className='m-2 mx-auto block rounded-lg bg-gray-800 p-1 text-neutral-100 shadow-md shadow-neutral-900 hover:scale-95'
         onClick={() => closeOnRequest()}
       >
         Close this window

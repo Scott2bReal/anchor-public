@@ -1,38 +1,31 @@
-import { useRef, useState } from "react";
-import toast from "react-hot-toast";
-import { useOnClickOutside } from "usehooks-ts";
-import { trpc } from "../utils/trpc";
-import { InlineEditButtons } from "./InlineEditButtons";
+import { useRef, useState } from 'react'
+import { useOnClickOutside } from 'usehooks-ts'
+import { useEditOfferTicket } from '../hooks/offer/useEditOfferTicket'
+import { InlineEditButtons } from './InlineEditButtons'
 
 type OfferEditTicketProps = {
-  offerId: string;
-  originalTicket: string;
-  onRequestClose: () => void;
+  offerId: string
+  originalTicket: string
+  onRequestClose: () => void
 }
 
-export const OfferEditTicket = ({offerId, originalTicket, onRequestClose}: OfferEditTicketProps) => {
+export const OfferEditTicket = ({
+  offerId,
+  originalTicket,
+  onRequestClose,
+}: OfferEditTicketProps) => {
   const [ticket, setTicket] = useState(originalTicket)
-  const ctx = trpc.useContext()
 
-  const editTicket = trpc.offers.updateZendeskTicket.useMutation({
-    onMutate: async () => {
-      await ctx.offers.getById.cancel()
-      await ctx.offers.getByClass.cancel()
-    },
-    onSettled: () => {
-      ctx.offers.getById.invalidate()
-      ctx.offers.getByClass.invalidate()
-    },
-    onSuccess: () => toast.success("Updated Zendesk ticket!"),
-    onError: (e) => toast.error(`Unable to edit Zendesk ticket: ${e.data?.zodError?.fieldErrors['zendeskTicket']}`)
-  })
+  const editTicket = useEditOfferTicket()
 
   const formRef = useRef(null)
   useOnClickOutside(formRef, () => onRequestClose())
 
   return (
     <>
-      <label htmlFor='offerNotes' className='font-bold'>Edit Zendesk Ticket</label>
+      <label htmlFor='offerNotes' className='font-bold'>
+        Edit Zendesk Ticket
+      </label>
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -49,12 +42,11 @@ export const OfferEditTicket = ({offerId, originalTicket, onRequestClose}: Offer
         <input
           onChange={(e) => setTicket(e.target.value)}
           autoFocus
-          className='text-neutral-900 px-2 py-1 rounded-lg'
+          className='rounded-lg px-2 py-1 text-neutral-900'
           placeholder={originalTicket}
         />
-      <InlineEditButtons onRequestClose={onRequestClose} />
+        <InlineEditButtons onRequestClose={onRequestClose} />
       </form>
     </>
-
   )
 }

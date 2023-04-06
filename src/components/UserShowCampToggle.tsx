@@ -1,40 +1,22 @@
 import { Switch } from '@headlessui/react'
-import { User } from '@prisma/client'
+import type { User } from '@prisma/client'
 import { useState } from 'react'
-import { toast } from 'react-hot-toast'
-import { trpc } from '../utils/trpc'
+import { useSetUserCampToggle } from '../hooks/user/useSetUserCamptoggle'
 
 interface Props {
   user: User
 }
 
 export const UserShowCampToggle = ({ user }: Props) => {
-  const ctx = trpc.useContext()
   const [showCampPref, setShowCampPref] = useState(user.showCamp)
-
-  const setUserShowCampPref = trpc.user.setShowCampPref.useMutation({
-    onMutate: async () => {
-      toast.loading(`Setting preferences...`)
-      await ctx.user.getCurrent.cancel()
-    },
-    onSettled: () => {
-      ctx.user.getCurrent.invalidate()
-    },
-    onSuccess: () => {
-      toast.dismiss()
-      toast.success(`Changed your preferences`)
-    },
-    onError: (e) => {
-      toast.dismiss()
-      toast.error(`Unable to change preferences: ${e.message}`)
-    },
-  })
+  const setUserShowCampPref = useSetUserCampToggle()
 
   const toggleShowCampPref = () => {
     setUserShowCampPref.mutate({
       userId: user.id,
       showCamp: !showCampPref,
     })
+    setShowCampPref(!showCampPref)
   }
 
   return (
@@ -42,11 +24,10 @@ export const UserShowCampToggle = ({ user }: Props) => {
       <Switch.Group>
         <Switch
           checked={showCampPref}
-          onChange={setShowCampPref}
-          onClick={() => toggleShowCampPref()}
+          onChange={toggleShowCampPref}
           name='priority'
           className='relative inline-flex h-6 w-11 items-center rounded-full
-        ui-checked:bg-sky-800 ui-not-checked:bg-neutral-300'
+        ui-checked:bg-green-700 ui-not-checked:bg-neutral-300'
         >
           <span className='sr-only'>Show All</span>
           <span

@@ -3,6 +3,6 @@ export const cssClassTypeCodes: { [key: string]: string } = {
   'Stone Masters': 'sm',
   'Teen Club': 'tc',
   'Rock Hoppers': 'rh',
-  'Scramblers': 'sc',
-  'Spider Monkeys': 'spm'
+  Scramblers: 'sc',
+  'Spider Monkeys': 'spm',
 }
