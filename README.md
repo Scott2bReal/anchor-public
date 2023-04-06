@@ -4,7 +4,7 @@ An application used by the operations team to manage the youth rec program at
 [First Ascent Climbing & Fitness](https://faclimbing.com)
 
 The actual application is currently under active development, so this demo
-version is just a snapshot of its current state as of January 12, 2023.
+version is just a snapshot of its current state as of April 6th, 2023.
 
 ## Demo Version
 
